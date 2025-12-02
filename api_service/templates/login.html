@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Login</h2>
+
+    <form action="/login" method="post">
+      <input name="email" placeholder="Email" required><br><br>
+      <input name="password" type="password" placeholder="Password" required><br><br>
+
+      <label>Login as:</label>
+      <select name="role">
+        <option value="patient">Patient</option>
+        <option value="doctor">Doctor</option>
+      </select>
+
+      <br><br>
+      <button type="submit">Login</button>
+    </form>
+
+    <p>
+      <a href="/register/patient">Register as Patient</a><br>
+      <a href="/register/doctor">Register as Doctor</a>
+    </p>
+  </body>
+</html>
