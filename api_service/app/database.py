@@ -29,6 +29,16 @@ def get_mongo_client() -> AsyncIOMotorClient:
         mongo_client_instance = AsyncIOMotorClient(connection_string)
     return mongo_client_instance
 
+def close_mongo_client():
+    """
+    Close the MongoDB client safely. Required for testing to avoid
+    'Event loop is closed' errors caused by stale async client instances.
+    """
+    global mongo_client_instance
+    if mongo_client_instance is not None:
+        mongo_client_instance.close()
+        mongo_client_instance = None
+
 
 def get_database():
     """

@@ -4,13 +4,24 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from passlib.hash import bcrypt
-from .database import get_database
+from .database import get_database, get_mongo_client, close_mongo_client
 from bson import ObjectId
+from contextlib import asynccontextmanager
 import html
 import re
 
+@asynccontextmanager
+async def lifespan(app):
+    # Startup
+    get_mongo_client()
+    yield
+    # Shutdown
+    close_mongo_client()
 
-api_application = FastAPI(title="Medical Queue API")
+api_application = FastAPI(
+    lifespan=lifespan,
+    title="Medical Queue API"
+)
 
 api_application.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -201,17 +212,3 @@ async def logout():
     response.delete_cookie("role")
     return response
 
-
-
-
-@api_application.get("/health")
-async def health_check():
-    """
-    Health-check endpoint for uptime monitoring and CI tests.
-
-    Returns
-    -------
-    dict
-        A dictionary containing a simple `"status": "ok"` message.
-    """
-    return {"status": "ok"}
