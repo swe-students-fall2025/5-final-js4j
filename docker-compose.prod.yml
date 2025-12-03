@@ -15,7 +15,7 @@ services:
       - ./database/init:/docker-entrypoint-initdb.d:ro
 
   api_service:
-    image: your_dockerhub_username/medqueue-api:latest
+    image: ct04/medqueue-api:latest
     container_name: medqueue-api
     env_file:
       - .env
