@@ -111,7 +111,9 @@ async def register_patient(
     existing = await db["patients"].find_one({"email": email})
 
     if existing:
-        return HTMLResponse("<h3>Email already registered. Please login.</h3>", status_code=400)
+        return HTMLResponse(
+            "<h3>Email already registered. Please login.</h3>", status_code=400
+        )
 
     hashed = bcrypt.hash(password)
 
@@ -150,7 +152,9 @@ async def register_doctor(
 
     hashed = bcrypt.hash(password)
     doctor_id = (
-        await db["doctors"].insert_one({"name": name, "email": email, "password_hash": hashed})
+        await db["doctors"].insert_one(
+            {"name": name, "email": email, "password_hash": hashed}
+        )
     ).inserted_id
 
     response = RedirectResponse("/doctor/dashboard", status_code=302)
@@ -256,9 +260,12 @@ async def doctor_dashboard(request: Request):
 
     db = get_database()
 
-    waiting_appointments = await db["appointments"].find(
-        {"status": "waiting"}
-    ).sort("queue_number", 1).to_list(length=1000)
+    waiting_appointments = (
+        await db["appointments"]
+        .find({"status": "waiting"})
+        .sort("queue_number", 1)
+        .to_list(length=1000)
+    )
 
     queue_data = []
     for appt in waiting_appointments:
@@ -278,7 +285,9 @@ async def doctor_dashboard(request: Request):
             }
         )
 
-    return templates.TemplateResponse("doctor_dashboard.html", {"request": request, "queue": queue_data})
+    return templates.TemplateResponse(
+        "doctor_dashboard.html", {"request": request, "queue": queue_data}
+    )
 
 
 @api_application.post("/doctor/complete/{appointment_id}")
@@ -291,7 +300,9 @@ async def doctor_complete_appointment(appointment_id: str):
     if appointment is None:
         return HTMLResponse("Appointment not found", status_code=404)
 
-    await db["appointments"].update_one({"_id": appt_id}, {"$set": {"status": "completed"}})
+    await db["appointments"].update_one(
+        {"_id": appt_id}, {"$set": {"status": "completed"}}
+    )
 
     queue_num = appointment.get("queue_number")
     if queue_num is not None:
@@ -313,9 +324,12 @@ async def doctor_view_patient(request: Request, patient_id: str):
     if patient is None:
         return HTMLResponse("Patient not found", status_code=404)
 
-    appointments = await db["appointments"].find(
-        {"patient_id": patient_obj_id}
-    ).sort("queue_number", 1).to_list(length=1000)
+    appointments = (
+        await db["appointments"]
+        .find({"patient_id": patient_obj_id})
+        .sort("queue_number", 1)
+        .to_list(length=1000)
+    )
 
     formatted = [
         {

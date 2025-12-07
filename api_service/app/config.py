@@ -19,9 +19,9 @@ class Settings(BaseSettings):
 
     class Config:  # pylint: disable=too-few-public-methods
         """Internal Pydantic configuration for loading environment variables."""
+
         env_file = ".env"
 
 
 # Global settings instance used throughout the API service.
 settings = Settings()
-

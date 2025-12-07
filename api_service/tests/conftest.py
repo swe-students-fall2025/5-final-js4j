@@ -36,6 +36,7 @@ def mock_db(monkeypatch):
 
     class InsertResult:
         """Small helper to emulate MongoDB insert_one results."""
+
         inserted_id = ObjectId()
 
     mock_patients.insert_one.return_value = InsertResult()
@@ -71,9 +72,5 @@ async def client(mock_db):  # pylint: disable=unused-argument
     """
     transport = ASGITransport(app=api_application)
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as async_client:
+    async with AsyncClient(transport=transport, base_url="http://test") as async_client:
         yield async_client, mock_db
-
