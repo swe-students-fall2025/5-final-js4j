@@ -25,14 +25,14 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pylint black
 
+      - name: Auto-format with Black
+        if: ${{ hashFiles(format('{0}/**/*.py', matrix.subdir)) != '' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          black .
+
       - name: Lint with Pylint
         if: ${{ hashFiles(format('{0}/**/*.py', matrix.subdir)) != '' }}
         run: |
           cd ${{ matrix.subdir }}
           pylint **/*.py
-
-      - name: Check formatting with Black
-        if: ${{ hashFiles(format('{0}/**/*.py', matrix.subdir)) != '' }}
-        run: |
-          cd ${{ matrix.subdir }}
-          black --check .
