@@ -1,10 +1,43 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <h1>Doctor Dashboard</h1>
-
-    <p>You are logged in as a doctor.</p>
-
-    <p><a href="/logout">Logout</a></p>
-  </body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Doctor Dashboard</h2>
+    {% if queue %}
+    <table>
+        <thead>
+            <tr>
+                <th>Queue #</th>
+                <th>Patient Name</th>
+                <th>Symptoms</th>
+                <th>ETA (min)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in queue %}
+            <tr>
+                <td>{{ item.queue_number }}</td>
+                <td>{{ item.patient_name }}</td>
+                <td>
+                    {% for s in item.symptoms %}
+                        {{ s.replace('_',' ').title() }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{% if item.eta %}{{ item.eta }}{% else %}--{% endif %}</td>
+                <td>
+                    <form method="post" action="/doctor/complete/{{ item.appointment_id }}" style="display:inline;">
+                        <button class="btn" type="submit">Mark Done</button>
+                    </form>
+                    <a class="btn" href="/doctor/patient/{{ item.patient_id }}">View History</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No patients waiting in the queue.</p>
+    {% endif %}
+    <p><a href="/logout">Log out</a></p>
+</div>
+{% endblock %}

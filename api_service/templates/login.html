@@ -1,29 +1,29 @@
-<!DOCTYPE html>
-<html>
-  <body>
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="card">
     <h2>Login</h2>
-
-    <form action="/login" method="post">
-      <input name="email" placeholder="Email" required><br><br>
-      <input name="password" type="password" placeholder="Password" required><br><br>
-
-    {% if request.query_params.get("error") == "invalid" %}
-    <p style="color:red;">Invalid email or password</p>
+    {% if request.query_params.get('error') == 'invalid' %}
+    <p style="color: red;">Invalid email or password.</p>
     {% endif %}
-
-      <label>Login as:</label>
-      <select name="role">
-        <option value="patient">Patient</option>
-        <option value="doctor">Doctor</option>
-      </select>
-
-      <br><br>
-      <button type="submit">Login</button>
+    <form method="post" action="/login">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role">
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+            </select>
+        </div>
+        <button class="btn" type="submit">Login</button>
     </form>
-
-    <p>
-      <a href="/register/patient">Register as Patient</a><br>
-      <a href="/register/doctor">Register as Doctor</a>
-    </p>
-  </body>
-</html>
+    <p>New user? Register as <a href="/register/patient">Patient</a> or <a href="/register/doctor">Doctor</a>.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Patient History{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Patient History for {{ patient.name }}</h2>
+    <p>Email: {{ patient.email }}</p>
+    {% if appointments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Queue #</th>
+                <th>Status</th>
+                <th>Estimated Wait (min)</th>
+                <th>Symptoms</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appt in appointments %}
+            <tr>
+                <td>{{ appt.queue_number or '--' }}</td>
+                <td>{{ appt.status }}</td>
+                <td>{% if appt.predicted_wait_minutes %}{{ appt.predicted_wait_minutes|int }}{% else %}--{% endif %}</td>
+                <td>
+                    {% for s in appt.symptoms %}
+                        {{ s.replace('_',' ').title() }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No appointment history available.</p>
+    {% endif %}
+    <p><a href="/doctor/dashboard">Back to Dashboard</a></p>
+</div>
+{% endblock %}

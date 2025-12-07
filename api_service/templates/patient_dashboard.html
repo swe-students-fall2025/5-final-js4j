@@ -1,20 +1,25 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <h1>Patient Dashboard</h1>
-
-    <p>Welcome to your dashboard!</p>
-
+{% extends 'base.html' %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Patient Dashboard</h2>
     {% if queue_number %}
-      <p><strong>Your queue number:</strong> {{ queue_number }}</p>
+    <p>Your current queue number is <strong>{{ queue_number }}</strong>.</p>
+        {% if eta %}
+        <p>Estimated wait time: <strong>{{ eta }}</strong> minutes.</p>
+        {% endif %}
     {% else %}
-      <p>You are not currently in the queue.</p>
+    <p>You do not have a current appointment.</p>
+    <p><a href="/onboarding/symptoms">Schedule a new appointment</a></p>
     {% endif %}
-
-    {% if eta %}
-      <p><strong>Estimated wait time:</strong> {{ eta }} minutes</p>
+    {% if symptoms %}
+    <h3>Your Reported Symptoms</h3>
+    <ul>
+        {% for symptom in symptoms %}
+        <li>{{ symptom.replace('_', ' ').title() }}</li>
+        {% endfor %}
+    </ul>
     {% endif %}
-
-    <p><a href="/logout">Logout</a></p>
-  </body>
-</html>
+    <p><a href="/logout">Log out</a></p>
+</div>
+{% endblock %}
