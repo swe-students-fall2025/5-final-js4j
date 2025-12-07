@@ -1,33 +1,29 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <h2>Patient Onboarding - Select Your Symptoms</h2>
-
-    <form action="/onboarding/symptoms" method="post">
-
-        <label><input type="checkbox" name="symptoms" value="fever"> Fever</label><br>
-        <label><input type="checkbox" name="symptoms" value="cough"> Cough</label><br>
-        <label><input type="checkbox" name="symptoms" value="fatigue"> Fatigue</label><br>
-        <label><input type="checkbox" name="symptoms" value="nausea"> Nausea</label><br>
-      
-        <!-- More common symptoms -->
-        <label><input type="checkbox" name="symptoms" value="headache"> Headache</label><br>
-        <label><input type="checkbox" name="symptoms" value="sore_throat"> Sore Throat</label><br>
-        <label><input type="checkbox" name="symptoms" value="shortness_of_breath"> Shortness of Breath</label><br>
-        <label><input type="checkbox" name="symptoms" value="chest_pain"> Chest Pain</label><br>
-        <label><input type="checkbox" name="symptoms" value="congestion"> Congestion</label><br>
-        <label><input type="checkbox" name="symptoms" value="vomiting"> Vomiting</label><br>
-        <label><input type="checkbox" name="symptoms" value="diarrhea"> Diarrhea</label><br>
-      
-        <br>
-        <label>
-          Other symptom:
-          <input type="text" name="other_symptom" maxlength="80" placeholder="Describe your symptom">
-        </label>
-      
-        <br><br>
-        <button type="submit">Continue</button>
-      </form>
-      
-  </body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Symptom Questionnaire{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Symptom Questionnaire</h2>
+    <form method="post" action="/onboarding/symptoms">
+        <p>Select your symptoms (check all that apply):</p>
+        <div class="form-group">
+            <label><input type="checkbox" name="symptoms" value="fever"> Fever</label><br>
+            <label><input type="checkbox" name="symptoms" value="cough"> Cough</label><br>
+            <label><input type="checkbox" name="symptoms" value="fatigue"> Fatigue</label><br>
+            <label><input type="checkbox" name="symptoms" value="nausea"> Nausea</label><br>
+            <label><input type="checkbox" name="symptoms" value="headache"> Headache</label><br>
+            <label><input type="checkbox" name="symptoms" value="sore_throat"> Sore Throat</label><br>
+            <label><input type="checkbox" name="symptoms" value="shortness_of_breath"> Shortness of Breath</label><br>
+            <label><input type="checkbox" name="symptoms" value="chest_pain"> Chest Pain</label><br>
+            <label><input type="checkbox" name="symptoms" value="congestion"> Congestion</label><br>
+            <label><input type="checkbox" name="symptoms" value="vomiting"> Vomiting</label><br>
+            <label><input type="checkbox" name="symptoms" value="diarrhea"> Diarrhea</label><br>
+            <label><input type="checkbox" name="symptoms" value="other"> Other</label><br>
+        </div>
+        <div class="form-group">
+            <label for="other_symptom">Other symptom description</label>
+            <input type="text" id="other_symptom" name="other_symptom">
+        </div>
+        <button class="btn" type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}
