@@ -39,6 +39,7 @@ jobs:
         if: ${{ hashFiles(format('{0}/app/**/*.py', matrix.subdir)) != '' }}
         run: |
           cd ${{ matrix.subdir }}
+          export PYTHONPATH=$(pwd)  # ensure imports like 'app.database' resolve
           if [ "${{ matrix.subdir }}" = "ml_service" ]; then
             pylint app/main.py app/predictor.py
           else
