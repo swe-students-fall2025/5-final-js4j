@@ -1,3 +1,10 @@
+"""Configuration module for the API service.
+
+This module defines application settings using Pydantic's BaseSettings.
+It loads values from environment variables or defaults and exposes a
+global `settings` instance used throughout the API service.
+"""
+
 from pydantic_settings import BaseSettings
 
 
@@ -10,14 +17,11 @@ class Settings(BaseSettings):
     mongo_host: str = "104.131.184.246"
     mongo_port: int = 27017
 
-    class Config:
+    class Config:  # pylint: disable=too-few-public-methods
         """Internal Pydantic configuration for loading environment variables."""
 
         env_file = ".env"
 
 
+# Global settings instance used throughout the API service
 settings = Settings()
-"""
-Global settings instance used by the API service to access configuration
-values such as MongoDB credentials and host information.
-"""

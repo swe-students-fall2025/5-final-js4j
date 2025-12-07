@@ -45,8 +45,5 @@ def mock_db(monkeypatch):
 async def client(mock_db):
     transport = ASGITransport(app=api_application)
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac, mock_db

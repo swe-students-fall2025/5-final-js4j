@@ -1,0 +1,47 @@
+name: Lint Python Services
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        subdir: [api_service, ml_service]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: ${{ hashFiles(format('{0}/app/**/*.py', matrix.subdir)) != '' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pylint black
+
+      - name: Auto-format with Black (app only)
+        if: ${{ hashFiles(format('{0}/app/**/*.py', matrix.subdir)) != '' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          if [ "${{ matrix.subdir }}" = "ml_service" ]; then
+            black app/main.py app/predictor.py
+          else
+            black app
+          fi
+
+      - name: Lint with Pylint (app only)
+        if: ${{ hashFiles(format('{0}/app/**/*.py', matrix.subdir)) != '' }}
+        run: |
+          cd ${{ matrix.subdir }}
+          export PYTHONPATH=$(pwd)  # ensure imports like 'app.database' resolve
+          if [ "${{ matrix.subdir }}" = "ml_service" ]; then
+            pylint app/main.py app/predictor.py
+          else
+            pylint app/**/*.py
+          fi
