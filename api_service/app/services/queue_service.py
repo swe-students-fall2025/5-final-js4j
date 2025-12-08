@@ -18,9 +18,11 @@ MEDIUM_URGENT_SYMPTOMS = {"fever", "vomiting", "diarrhea"}
 def compute_triage_priority(symptom_names: List[str]) -> float:
     """Compute a deterministic triage score based solely on symptoms."""
     score = sum(
-        5.0 if s.lower() in VERY_URGENT_SYMPTOMS
-        else 3.0 if s.lower() in MEDIUM_URGENT_SYMPTOMS
-        else 1.0
+        (
+            5.0
+            if s.lower() in VERY_URGENT_SYMPTOMS
+            else 3.0 if s.lower() in MEDIUM_URGENT_SYMPTOMS else 1.0
+        )
         for s in set(symptom_names)
     )
     return max(1.0, min(score, 10.0))
@@ -38,7 +40,9 @@ async def _get_minutes_per_patient(symptom_names: List[str], queue_size: int) ->
     return 10.0
 
 
-def _determine_insertion_index(new_priority: float, appointments: List[Dict[str, Any]]) -> int:
+def _determine_insertion_index(
+    new_priority: float, appointments: List[Dict[str, Any]]
+) -> int:
     """Determine where in the queue the new patient should be inserted."""
     for idx, appt in enumerate(appointments):
         existing_priority = appt.get("triage_priority")
@@ -63,38 +67,84 @@ async def create_appointment_for_patient(
     symptom_names: List[str],
 ) -> Dict[str, Any]:
     """Create a new appointment and insert it into the queue based on triage priority."""
-    db = get_database()
-    collection = db["appointments"]
+    database = get_database()
+    collection = database["appointments"]
 
-    waiting_appts = await collection.find({"status": "waiting"}) \
-        .sort("queue_number", 1).to_list(length=1000)
+    waiting_appointments = (
+        await collection.find({"status": "waiting"})
+        .sort("queue_number", 1)
+        .to_list(length=1000)
+    )
     triage_priority = compute_triage_priority(symptom_names)
 
-    queue_size = len(waiting_appts) + 1
-    minutes_per_patient = await _get_minutes_per_patient(symptom_names, queue_size)
+    insertion_index = _determine_insertion_index(triage_priority, waiting_appointments)
+    insertion_position = insertion_index + 1
 
-    insertion_idx = _determine_insertion_index(triage_priority, waiting_appts)
-    insertion_pos = insertion_idx + 1
-    people_ahead = insertion_pos - 1
-
-    severity = _severity_factor(triage_priority)
-    predicted_wait = minutes_per_patient * float(people_ahead) * severity
-
-    # Shift queue numbers
+    # Shift queue numbers for everyone at or after the insertion point
     await collection.update_many(
-        {"status": "waiting", "queue_number": {"$gte": insertion_pos}},
+        {"status": "waiting", "queue_number": {"$gte": insertion_position}},
         {"$inc": {"queue_number": 1}},
     )
 
-    appointment_doc: Dict[str, Any] = {
+    appointment_document: Dict[str, Any] = {
         "patient_id": patient_id,
         "symptoms": symptom_names,
         "status": "waiting",
-        "queue_number": insertion_pos,
-        "predicted_wait_minutes": predicted_wait,
+        "queue_number": insertion_position,
+        # Temporary value; will be recalculated for everyone below
+        "predicted_wait_minutes": 0.0,
         "triage_priority": triage_priority,
     }
-    result = await collection.insert_one(appointment_doc)
-    appointment_doc["_id"] = result.inserted_id
+    insertion_result = await collection.insert_one(appointment_document)
+    inserted_id = insertion_result.inserted_id
 
-    return appointment_doc
+    # Recalculate ETAs for all waiting patients (including the new one)
+    await recalculate_wait_times_for_waiting_appointments()
+
+    updated_document = await collection.find_one({"_id": inserted_id})
+    return updated_document
+
+
+async def recalculate_wait_times_for_waiting_appointments() -> None:
+    """Recalculate predicted_wait_minutes for all waiting patients based on queue order."""
+    database = get_database()
+    collection = database["appointments"]
+
+    waiting_appointments = (
+        await collection.find({"status": "waiting"})
+        .sort("queue_number", 1)
+        .to_list(length=1000)
+    )
+
+    if not waiting_appointments:
+        return
+
+    queue_length = len(waiting_appointments)
+
+    for index_in_queue, appointment_document in enumerate(waiting_appointments):
+        symptom_names = appointment_document.get("symptoms", [])
+        triage_priority = appointment_document.get("triage_priority")
+
+        if triage_priority is None:
+            triage_priority = compute_triage_priority(symptom_names)
+
+        # Use the ML service to estimate minutes per patient for this queue
+        minutes_per_patient = await _get_minutes_per_patient(
+            symptom_names=symptom_names,
+            queue_size=queue_length,
+        )
+
+        people_ahead = index_in_queue  # 0 for first in queue
+        severity = _severity_factor(triage_priority)
+        predicted_wait = minutes_per_patient * float(people_ahead) * severity
+
+        await collection.update_one(
+            {"_id": appointment_document["_id"]},
+            {
+                "$set": {
+                    "queue_number": index_in_queue + 1,
+                    "triage_priority": triage_priority,
+                    "predicted_wait_minutes": predicted_wait,
+                }
+            },
+        )

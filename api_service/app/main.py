@@ -14,7 +14,10 @@ from fastapi.templating import Jinja2Templates
 from passlib.hash import bcrypt
 
 from .database import get_database, get_mongo_client, close_mongo_client
-from .services.queue_service import create_appointment_for_patient
+from .services.queue_service import (
+    create_appointment_for_patient,
+    recalculate_wait_times_for_waiting_appointments,
+)
 
 
 @asynccontextmanager
@@ -40,7 +43,10 @@ async def auth_middleware(request: Request, call_next):
         "/register/doctor",
         "/static",
     ]
-    if any(request.url.path.startswith(p) for p in open_paths) or request.url.path == "/":
+    if (
+        any(request.url.path.startswith(p) for p in open_paths)
+        or request.url.path == "/"
+    ):
         return await call_next(request)
     if not request.cookies.get("user_id"):
         return RedirectResponse("/login")
@@ -74,9 +80,7 @@ async def login(request: Request):
     if not user or not bcrypt.verify(password, user["password_hash"]):
         return RedirectResponse("/login?error=invalid", status_code=302)
 
-    redirect_url = (
-        "/patient/dashboard" if role == "patient" else "/doctor/dashboard"
-    )
+    redirect_url = "/patient/dashboard" if role == "patient" else "/doctor/dashboard"
     response = RedirectResponse(redirect_url, status_code=302)
     response.set_cookie("user_id", str(user["_id"]))
     response.set_cookie("role", role)
@@ -104,7 +108,12 @@ async def register_patient(
         )
 
     hashed = bcrypt.hash(password)
-    patient_doc = {"name": name, "email": email, "password_hash": hashed, "symptoms": []}
+    patient_doc = {
+        "name": name,
+        "email": email,
+        "password_hash": hashed,
+        "symptoms": [],
+    }
     patient_id = (await db["patients"].insert_one(patient_doc)).inserted_id
 
     response = RedirectResponse("/onboarding/symptoms", status_code=302)
@@ -160,9 +169,18 @@ async def symptoms_submit(request: Request):
         return RedirectResponse("/login")
 
     allowed = {
-        "fever", "cough", "fatigue", "nausea", "headache", "sore_throat",
-        "shortness_of_breath", "chest_pain", "congestion", "vomiting",
-        "diarrhea", "other",
+        "fever",
+        "cough",
+        "fatigue",
+        "nausea",
+        "headache",
+        "sore_throat",
+        "shortness_of_breath",
+        "chest_pain",
+        "congestion",
+        "vomiting",
+        "diarrhea",
+        "other",
     }
     symptoms = [s for s in symptoms if s in allowed]
     cleaned_other = (
@@ -198,9 +216,7 @@ async def patient_dashboard(request: Request):
         {"patient_id": ObjectId(user_id), "status": "waiting"}
     )
 
-    queue_number = (
-        appointment.get("queue_number") if appointment else None
-    )
+    queue_number = appointment.get("queue_number") if appointment else None
     eta = (
         int(appointment.get("predicted_wait_minutes"))
         if appointment and appointment.get("predicted_wait_minutes")
@@ -226,9 +242,12 @@ async def doctor_dashboard(request: Request):
         return RedirectResponse("/login")
 
     db = get_database()
-    waiting_appointments = await db["appointments"].find(
-        {"status": "waiting"}
-    ).sort("queue_number", 1).to_list(length=1000)
+    waiting_appointments = (
+        await db["appointments"]
+        .find({"status": "waiting"})
+        .sort("queue_number", 1)
+        .to_list(length=1000)
+    )
 
     queue_data = []
     for appt in waiting_appointments:
@@ -257,21 +276,26 @@ async def doctor_dashboard(request: Request):
 async def doctor_complete_appointment(appointment_id: str):
     """Mark appointment completed and reorder the queue."""
     db = get_database()
-    appt_id = ObjectId(appointment_id)
-    appt = await db["appointments"].find_one({"_id": appt_id})
-    if not appt:
+    appointment_object_id = ObjectId(appointment_id)
+    appointment_document = await db["appointments"].find_one(
+        {"_id": appointment_object_id}
+    )
+    if not appointment_document:
         return HTMLResponse("Appointment not found", status_code=404)
 
     await db["appointments"].update_one(
-        {"_id": appt_id}, {"$set": {"status": "completed"}}
+        {"_id": appointment_object_id}, {"$set": {"status": "completed"}}
     )
 
-    queue_num = appt.get("queue_number")
-    if queue_num is not None:
+    queue_number = appointment_document.get("queue_number")
+    if queue_number is not None:
         await db["appointments"].update_many(
-            {"status": "waiting", "queue_number": {"$gt": queue_num}},
+            {"status": "waiting", "queue_number": {"$gt": queue_number}},
             {"$inc": {"queue_number": -1}},
         )
+
+    # recomputes ETA fter completing of appointment
+    await recalculate_wait_times_for_waiting_appointments()
 
     return RedirectResponse("/doctor/dashboard", status_code=302)
 
@@ -285,9 +309,12 @@ async def doctor_view_patient(request: Request, patient_id: str):
     if not patient:
         return HTMLResponse("Patient not found", status_code=404)
 
-    appointments = await db["appointments"].find(
-        {"patient_id": patient_obj_id}
-    ).sort("queue_number", 1).to_list(length=1000)
+    appointments = (
+        await db["appointments"]
+        .find({"patient_id": patient_obj_id})
+        .sort("queue_number", 1)
+        .to_list(length=1000)
+    )
 
     converted_appointments = [
         {
