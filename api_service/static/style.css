@@ -217,4 +217,18 @@ ul {
     animation: blink .8s step-end infinite;
 }
 
+header h1,
+header h1 a {
+    color: white;
+}
+
+header h1 a {
+    text-decoration: none;
+}
+
+header h1 a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
 
