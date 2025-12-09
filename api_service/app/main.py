@@ -225,6 +225,7 @@ async def patient_dashboard(request: Request):
             "request": request,
             "queue_number": queue_number,
             "symptoms": patient.get("symptoms", []) if patient else [],
+            "patient_name": patient.get("name") if patient else "",
         },
     )
 
@@ -262,8 +263,15 @@ async def doctor_dashboard(request: Request):
             }
         )
 
+    doctor = await db["doctors"].find_one({"_id": ObjectId(user_id)})
+
     return templates.TemplateResponse(
-        "doctor_dashboard.html", {"request": request, "queue": queue_data}
+        "doctor_dashboard.html", 
+            {
+                "request": request, 
+                "queue": queue_data,
+                "doctor_name": doctor.get("name") if doctor else "",
+            }
     )
 
 
