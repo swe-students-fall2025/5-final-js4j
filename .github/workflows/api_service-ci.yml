@@ -9,8 +9,6 @@ on:
       - "docker-compose.prod.yml"
   pull_request:
     branches: [ main, master ]
-    paths:
-      - "api_service/**"
 
 jobs:
   api-service-ci-cd:

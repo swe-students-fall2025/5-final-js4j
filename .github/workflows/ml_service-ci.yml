@@ -9,10 +9,6 @@ on:
       - "docker-compose.prod.yml"
   pull_request:
     branches: [ main, master ]
-    paths:
-      - "ml_service/**"
-      - ".github/workflows/ml_service-ci.yml"
-      - "docker-compose.prod.yml"
 
 jobs:
   ml-service-ci-cd:
