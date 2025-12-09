@@ -206,7 +206,7 @@ async def symptoms_submit(request: Request):
 
 @api_application.get("/patient/dashboard", response_class=HTMLResponse)
 async def patient_dashboard(request: Request):
-    """Render patient dashboard with queue info."""
+    """Render patient dashboard with queue and eta info."""
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/login")
@@ -218,12 +218,18 @@ async def patient_dashboard(request: Request):
     )
 
     queue_number = appointment.get("queue_number") if appointment else None
+    eta = (
+        int(appointment.get("predicted_wait_minutes"))
+        if appointment and appointment.get("predicted_wait_minutes")
+        else None
+    )
 
     return templates.TemplateResponse(
         "patient_dashboard.html",
         {
             "request": request,
             "queue_number": queue_number,
+            "eta": eta,
             "symptoms": patient.get("symptoms", []) if patient else [],
         },
     )
