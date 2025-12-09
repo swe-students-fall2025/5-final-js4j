@@ -13,12 +13,9 @@ Built as a distributed microservice system with machine-learning prediction, aud
 
 # Docker Images
 Service	DockerHub Link
-- API	https://hub.docker.com/r/
-ct04/medqueue-api
-- ML Predictor	https://hub.docker.com/r/
-ct04/medqueue-ml
-- Event Logger	https://hub.docker.com/r/
-ct04/medqueue-logger
+- API	https://hub.docker.com/r/ct04/medqueue-api
+- ML Predictor	https://hub.docker.com/r/ct04/medqueue-ml
+- Event Logger	https://hub.docker.com/r/ct04/medqueue-logger
 
 # Team Members
 
