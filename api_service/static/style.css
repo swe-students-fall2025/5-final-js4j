@@ -263,9 +263,8 @@ td a {
     color:white;
 }
 
-/* Green: Mark Done */
 .done-btn {
-    background-color: #28a745; /* Bootstrap Success Green */
+    background-color: #28a745; 
 }
 
 .done-btn:hover {
@@ -273,9 +272,8 @@ td a {
     transform: translateY(-1px);
 }
 
-/* Blue: View History */
 .view-btn {
-    background-color: #007bff; /* Bootstrap Primary Blue */
+    background-color: #007bff;
 }
 
 .view-btn:hover {
