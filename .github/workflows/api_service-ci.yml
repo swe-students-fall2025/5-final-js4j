@@ -39,9 +39,12 @@ jobs:
 
       - name: Run tests with coverage
         working-directory: ${{ env.service_directory }}
+        env:
+          PYTHONPATH: ${{ github.workspace }}/api_service
         run: |
           coverage run --source=apps -m pytest
           coverage report --fail-under=80
+
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
