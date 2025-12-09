@@ -2,6 +2,11 @@
 {% block title %}Welcome to MedQT{% endblock %}
 
 {% block content %}
+
+{% if not user_role %}
+<!-- ============================
+     NOT LOGGED IN VIEW
+================================= -->
 <div class="hero">
     <h1>
         Welcome to <span class="highlight">MedQT</span>
@@ -30,6 +35,33 @@
     </p>
 </div>
 
+{% else %}
+<!-- ============================
+     LOGGED IN VIEW
+================================= -->
+<div class="card option-card">
+    <h2>Welcome back to MedQT!</h2>
+    <p>
+        You're logged in as:
+        <strong>{{ user_role|capitalize }}</strong>
+    </p>
+
+    <div class="button-grid">
+        {% if user_role == 'patient' %}
+        <a class="btn role-btn" href="/patient/dashboard">Go to Dashboard</a>
+        {% elif user_role == 'doctor' %}
+        <a class="btn role-btn" href="/doctor/dashboard">Go to Dashboard</a>
+        {% endif %}
+
+        <!-- Logout simply deletes cookies (your backend already implements /logout) -->
+        <a class="btn role-btn danger" href="/logout">Logout</a>
+    </div>
+</div>
+{% endif %}
+
+
+<!-- Keep typing animation only for NOT-LOGGED-IN users -->
+{% if not user_role %}
 <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 <script>
 var typed = new Typed('#typing', {
@@ -45,4 +77,6 @@ var typed = new Typed('#typing', {
   showCursor: false
 });
 </script>
+{% endif %}
+
 {% endblock %}
