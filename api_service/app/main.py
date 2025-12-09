@@ -18,6 +18,7 @@ from .database import get_database, get_mongo_client, close_mongo_client
 from .services.queue_service import (
     create_appointment_for_patient,
     recalculate_wait_times_for_waiting_appointments,
+    notify_next_patient_ready,
 )
 
 
@@ -57,7 +58,14 @@ async def auth_middleware(request: Request, call_next):
 @api_application.get("/", response_class=HTMLResponse)
 async def root_redirect(request: Request):
     """Redirect root URL to login page."""
-    return templates.TemplateResponse("home.html", {"request": request})
+    user_role = request.cookies.get("role")
+    return templates.TemplateResponse(
+        "home.html",
+        {
+            "request": request,
+            "user_role": user_role,
+        },
+    )
 
 
 @api_application.get("/login", response_class=HTMLResponse)
@@ -231,6 +239,7 @@ async def patient_dashboard(request: Request):
             "queue_number": queue_number,
             "eta": eta,
             "symptoms": patient.get("symptoms", []) if patient else [],
+            "user_role": "patient",
         },
     )
 
@@ -269,34 +278,50 @@ async def doctor_dashboard(request: Request):
         )
 
     return templates.TemplateResponse(
-        "doctor_dashboard.html", {"request": request, "queue": queue_data}
+        "doctor_dashboard.html",
+        {
+            "request": request,
+            "queue": queue_data,
+            "user_role": "doctor",
+        },
     )
 
 
 @api_application.post("/doctor/complete/{appointment_id}")
-async def doctor_complete_appointment(appointment_id: str):
-    """Mark appointment completed and reorder the queue."""
-    db = get_database()
+async def doctor_complete_appointment(request: Request, appointment_id: str):
+    """Mark appointment completed, reorder the queue, and notify the next patient."""
+    role_cookie = request.cookies.get("role")
+    doctor_identifier_cookie = request.cookies.get("user_id")
+
+    if role_cookie != "doctor" or not doctor_identifier_cookie:
+        return RedirectResponse("/login")
+
+    database = get_database()
     appointment_object_id = ObjectId(appointment_id)
-    appointment_document = await db["appointments"].find_one(
+    appointment_document = await database["appointments"].find_one(
         {"_id": appointment_object_id}
     )
     if not appointment_document:
         return HTMLResponse("Appointment not found", status_code=404)
 
-    await db["appointments"].update_one(
+    await database["appointments"].update_one(
         {"_id": appointment_object_id}, {"$set": {"status": "completed"}}
     )
 
     queue_number = appointment_document.get("queue_number")
     if queue_number is not None:
-        await db["appointments"].update_many(
+        await database["appointments"].update_many(
             {"status": "waiting", "queue_number": {"$gt": queue_number}},
             {"$inc": {"queue_number": -1}},
         )
 
-    # recomputes ETA fter completing of appointment
+    # Recompute ETAs after completing appointment
     await recalculate_wait_times_for_waiting_appointments()
+
+    # notify the next waiting patient that their appointment is ready
+    await notify_next_patient_ready(
+        doctor_identifier=ObjectId(doctor_identifier_cookie)
+    )
 
     return RedirectResponse("/doctor/dashboard", status_code=302)
 
@@ -348,6 +373,47 @@ async def doctor_view_patient(request: Request, patient_id: str):
                 "email": patient.get("email"),
             },
             "appointments": converted_appointments,
+            "user_role": "doctor",
+        },
+    )
+
+
+@api_application.get("/messages", response_class=HTMLResponse)
+async def patient_messages(request: Request):
+    """Show messages for the logged-in patient."""
+    user_identifier_cookie = request.cookies.get("user_id")
+    role_cookie = request.cookies.get("role")
+
+    if not user_identifier_cookie or role_cookie != "patient":
+        # Only logged-in patients can see this page
+        return RedirectResponse("/login")
+
+    database = get_database()
+    messages_cursor = (
+        database["messages"]
+        .find({"patient_id": ObjectId(user_identifier_cookie)})
+        .sort("created_at", -1)
+    )
+    message_documents = await messages_cursor.to_list(length=100)
+
+    readable_messages = []
+    for message_document in message_documents:
+        readable_messages.append(
+            {
+                "id": str(message_document["_id"]),
+                "text": message_document.get("text"),
+                "created_at": message_document.get("created_at"),
+                "kind": message_document.get("kind", "ready_for_appointment"),
+                "read": message_document.get("read", False),
+            }
+        )
+
+    return templates.TemplateResponse(
+        "messages.html",
+        {
+            "request": request,
+            "messages": readable_messages,
+            "user_role": "patient",  # ensure messages icon shows on this page too
         },
     )
 

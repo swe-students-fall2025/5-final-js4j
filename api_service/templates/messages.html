@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}My Messages{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Appointment Messages</h2>
+
+    {% if messages|length == 0 %}
+        <p>You do not have any messages yet.</p>
+    {% else %}
+        <ul class="messages-list">
+            {% for message in messages %}
+            <li class="messages-item">
+                <strong>
+                    {% if message.kind == "ready_for_appointment" %}
+                        Appointment ready
+                    {% else %}
+                        Message
+                    {% endif %}
+                </strong>
+                <div>{{ message.text }}</div>
+                {% if message.created_at %}
+                <small>{{ message.created_at }}</small>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
