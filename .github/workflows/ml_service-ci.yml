@@ -41,7 +41,7 @@ jobs:
         working-directory: ${{ env.service_directory }}
         run: |
           coverage run -m pytest
-          coverage report --fail-under=0
+          coverage report --fail-under=80
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
