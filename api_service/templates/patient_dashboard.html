@@ -3,6 +3,7 @@
 {% block content %}
 <div class="card">
     <h2>Patient Dashboard</h2>
+    <p>Welcome, {{patient_name}}!</p>
     {% if queue_number %}
     <p>Your current queue number is <strong>{{ queue_number }}</strong>.</p>
     {% if eta %}

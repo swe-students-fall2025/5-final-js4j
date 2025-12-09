@@ -3,6 +3,7 @@
 {% block content %}
 <div class="card">
     <h2>Doctor Dashboard</h2>
+    <p>Welcome, {{doctor_name}}!</p>
     {% if queue %}
     <table>
         <thead>
@@ -25,9 +26,9 @@
                 </td>
                 <td>
                     <form method="post" action="/doctor/complete/{{ item.appointment_id }}" style="display:inline;">
-                        <button class="btn" type="submit">Mark Done</button>
+                        <button class="done-btn" type="submit">Mark Done</button>
                     </form>
-                    <a class="btn" href="/doctor/patient/{{ item.patient_id }}">View History</a>
+                    <a class="view-btn" href="/doctor/patient/{{ item.patient_id }}">View History</a>
                 </td>
             </tr>
             {% endfor %}
