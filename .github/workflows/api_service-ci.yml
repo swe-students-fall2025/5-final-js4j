@@ -40,7 +40,7 @@ jobs:
       - name: Run tests with coverage
         working-directory: ${{ env.service_directory }}
         run: |
-          coverage run --source=api_service/apps -m pytest
+          coverage run --source=api_service.apps -m pytest
           coverage report --fail-under=80
 
       - name: Log in to Docker Hub
