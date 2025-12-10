@@ -6,8 +6,7 @@
 
 ## MedQT
 
-AI-powered, symptom-based triage and queue management for modern clinics.
-Built as a distributed microservice system with machine-learning prediction, audit logging, and a rich interactive UI.
+What if patients didn’t have to wait in uncertainty, and clinics could prioritize care automatically based on symptoms? That's where MedQT comes in. This platform provides AI-driven triage, real-time queue management, and personalized wait-time prediction using a distributed microservice design. With a transparent audit log and clean patient–doctor interface, it makes walk-in care faster, safer, and more efficient.
 
 ---
 
