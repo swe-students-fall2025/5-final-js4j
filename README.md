@@ -64,61 +64,66 @@ This project is containerised, so the simplest and recommended way to run everyt
 
 - Install:
 
-Git
+- Git
 
-Docker
+- Docker
 
-Windows/macOS: install Docker Desktop
+- Windows/macOS: install Docker Desktop
 
-Linux: install docker and the Compose plugin (docker compose)
+- Linux: install docker and the Compose plugin (docker compose)
 
-Python 3.11+ (only needed if you want to run services without Docker)
+- Python 3.11+ (only needed if you want to run services without Docker)
+
+---
 
 Verify:
 
-git --version
-docker --version
-docker compose version
+- git --version
+- docker --version
+- docker compose version
 
 # 2. Clone the Repository
-git clone https://github.com/swe-students-fall2025/5-final-js4j.git
-cd 5-final-js4j
+- git clone https://github.com/swe-students-fall2025/5-final-js4j.git
+- cd 5-final-js4j
 
 # 3. Create the .env File
 
-sent in private chat with submission
+- Sent in private chat with submission
 
 
-Then edit .env and update any passwords or secrets as described in the section “Secret configuration files (.env and env.example)” below.
+- Then edit .env and update any passwords or secrets as described in the section “Secret configuration files (.env and env.example)” below.
 
 # 4. Run the Full System in Development
 
 From the project root:
 
-docker compose up --build
+- docker compose up --build
 
+---
 
 This will start:
 
-MongoDB (with initial collections and seed data from database/init)
+- MongoDB (with initial collections and seed data from database/init)
 
-API service (FastAPI)
+- API service (FastAPI)
 
-ML service (wait-time predictor)
+- ML service (wait-time predictor)
+
+---
 
 Once the containers are healthy, visit:
 
-API & web UI (local Dev): http://localhost:8000/
+- API & web UI (local Dev): http://localhost:8000/
 
-The deployed project is available at:
+- The deployed project is available at:
 
-Production URL: http://104.131.184.246:8000/
+- Production URL: http://104.131.184.246:8000/
 
 ### Required GitHub Secrets
 
 The following secrets must be configured in the GitHub repository:
 
-- `DOCKERHUB_USERNAME` – Your DockerHub account username
+- `DOCKERHUB_USERNAME` – My DockerHub account username
 - `DOCKERHUB_TOKEN` – A DockerHub Personal Access Token with write permission
 - `DO_SSH_KEY` – The private key used by CI/CD to deploy to the droplet
 - `D0_SSH_HOST` – The IP address of the droplet
@@ -127,7 +132,7 @@ The following secrets must be configured in the GitHub repository:
 
 These must be added under:
 
-GitHub → Settings → Secrets and variables → Actions → New Repository Secret
+- GitHub → Settings → Secrets and variables → Actions → New Repository Secret
 
 
 An exercise to put to practice software development teamwork, subsystem communication, containers, deployment, and CI/CD pipelines. See [instructions](./instructions.md) for details.
