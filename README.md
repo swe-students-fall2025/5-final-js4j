@@ -19,6 +19,7 @@ Service	DockerHub Link
 # Team Members
 
 - Conor Tiernan - https://github.com/ct-04
+- Sean Tang - https://github.com/plant445
 
 ---
 
