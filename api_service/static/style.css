@@ -78,11 +78,6 @@ header h1 {
     margin-bottom: 1rem;
 }
 
-/* .form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-} */
 
 .form-group label {
 
@@ -223,14 +218,6 @@ ul {
     100% { border-color: black; }
 }
 
-.typing-text {
-    caret-color: transparent;
-}
-
-.typing-text {
-    animation: blink .8s step-end infinite;
-}
-
 td form,
 td a {
     display: inline-block;
@@ -263,8 +250,9 @@ td a {
     color:white;
 }
 
+/* Green: Mark Done */
 .done-btn {
-    background-color: #28a745; 
+    background-color: #28a745; /* Bootstrap Success Green */
 }
 
 .done-btn:hover {
@@ -272,13 +260,50 @@ td a {
     transform: translateY(-1px);
 }
 
+/* Blue: View History */
 .view-btn {
-    background-color: #007bff;
+    background-color: #007bff; /* Bootstrap Primary Blue */
 }
 
 .view-btn:hover {
     background-color: #9acbff;
     transform: translateY(-1px);
 }
+
+.typing-text {
+    caret-color: transparent;
+}
+
+.typing-text {
+    animation: blink .8s step-end infinite;
+}
+
+header h1,
+header h1 a {
+    color: white;
+}
+
+header h1 a {
+    text-decoration: none;
+}
+
+header h1 a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+.messages-link {
+    color: white;
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid white;
+    font-weight: 600;
+}
+
+.messages-link:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
 
 

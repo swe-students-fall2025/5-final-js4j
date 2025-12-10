@@ -6,6 +6,9 @@
     <p>Welcome, {{patient_name}}!</p>
     {% if queue_number %}
     <p>Your current queue number is <strong>{{ queue_number }}</strong>.</p>
+    {% if eta %}
+    <p>Estimated wait time: <strong>{{ eta }}</strong> minutes.</p>
+    {% endif %}
     {% else %}
     <p>You do not have a current appointment.</p>
     <p><a href="/onboarding/symptoms">Schedule a new appointment</a></p>

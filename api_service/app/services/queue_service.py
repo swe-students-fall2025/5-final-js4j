@@ -16,6 +16,8 @@ VERY_URGENT_SYMPTOMS = {
 
 MEDIUM_URGENT_SYMPTOMS = {"fever", "vomiting", "diarrhea"}
 
+READY_FOR_APPOINTMENT_MESSAGE = "Hi! We are ready for your appointment now!"
+
 
 def compute_triage_priority(symptom_names: List[str]) -> float:
     """Compute a deterministic triage score based solely on symptoms."""
@@ -151,3 +153,38 @@ async def recalculate_wait_times_for_waiting_appointments() -> None:
                 }
             },
         )
+
+
+async def notify_next_patient_ready(
+    doctor_identifier: ObjectId | None = None,
+) -> Dict[str, Any] | None:
+    """Create a 'ready for appointment' message for the next waiting patient."""
+    database = get_database()
+    appointments_collection = database["appointments"]
+    messages_collection = database["messages"]
+
+    # Find the next patient in the queue: the waiting appointment with smallest queue_number
+    next_appointment_document = await appointments_collection.find_one(
+        {"status": "waiting"},
+        sort=[("queue_number", 1)],
+    )
+
+    if not next_appointment_document:
+        return None
+
+    message_document: Dict[str, Any] = {
+        "patient_id": next_appointment_document["patient_id"],
+        "doctor_id": doctor_identifier,
+        "appointment_id": next_appointment_document["_id"],
+        "text": READY_FOR_APPOINTMENT_MESSAGE,
+        "created_at": datetime.utcnow(),
+        "read": False,
+        "kind": "ready_for_appointment",
+    }
+
+    insert_result = await messages_collection.insert_one(message_document)
+
+    return {
+        "patient_id": str(next_appointment_document["patient_id"]),
+        "message_id": str(insert_result.inserted_id),
+    }
