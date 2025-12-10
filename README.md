@@ -32,33 +32,33 @@ Service	DockerHub Link
 
 # API Service (FastAPI)
 
-Hosts patient and doctor dashboards
+- Hosts patient and doctor dashboards
 
-Implements triage logic
+- Implements triage logic
 
-Communicates with the ML predictor
+- Communicates with the ML predictor
 
-Sends audit events to the Logger
+- Sends audit events to the Logger
 
-Stores data in MongoDB
+- Stores data in MongoDB
 
 # ML Predictor Service
 
-Flask service hosting a trained regression model
+- Flask service hosting a trained regression model
 
-Predicts estimated wait times
+- Predicts estimated wait times
 
-Used by API for patient ETA calculations
+- Used by API for patient ETA calculations
 
 # Mongo DB Service
 
-Mongo DB database hosted by the droplet
+- Mongo DB database hosted by the droplet
 
 ---
 
 ### Configuring and Running the System (All Platforms)
 
-This project is containerised, so the simplest and recommended way to run everything (API, ML service, MongoDB, seed data) is with Docker Compose.
+- This project is containerised, so the simplest and recommended way to run everything (API, ML service, MongoDB, seed data) is with Docker Compose.
 
 # 1. Prerequisites
 
