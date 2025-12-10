@@ -4,33 +4,35 @@
 [![ML Service CI](https://github.com/swe-students-fall2025/5-final-js4j/actions/workflows/ml_service-ci.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-js4j/actions/workflows/ml_service-ci.yml)
 [![Linting CI](https://github.com/swe-students-fall2025/5-final-js4j/actions/workflows/lint.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-js4j/actions/workflows/lint.yml)
 
-### MedQT
+## MedQT
 
 AI-powered, symptom-based triage and queue management for modern clinics.
 Built as a distributed microservice system with machine-learning prediction, audit logging, and a rich interactive UI.
 
 ---
 
-# Docker Images
+## Docker Images
 Service	DockerHub Link
 - API	https://hub.docker.com/r/ct04/medqueue-api
 - ML Predictor	https://hub.docker.com/r/ct04/medqueue-ml
 
-# Team Members
+## Team Members
 
-- Conor Tiernan - https://github.com/ct-04
-- Sean Tang - https://github.com/plant445
-- Jaylon McDuffie - https://github.com/treejitsu
-- Howard Appel - https://github.com/hna2019
-- Sam Murshed - https://github.com/SamMurshed
+| Name | GitHub |
+|------|--------|
+| Conor Tiernan | [ct-04](https://github.com/ct-04) |
+| Sean Tang | [plant445](https://github.com/plant445) |
+| Jaylon McDuffie | [treejitsu](https://github.com/treejitsu) |
+| Howard Appel | [hna2019](https://github.com/hna2019) |
+| Sam Murshed | [SamMurshed](https://github.com/SamMurshed) |
 
 ---
 
-# System Architecture
+## System Architecture
 
-- MedQueue consists of 3 interconnected microservices:
+- MedQT consists of 3 interconnected microservices:
 
-# API Service (FastAPI)
+### API Service (FastAPI)
 
 - Hosts patient and doctor dashboards
 
@@ -42,7 +44,7 @@ Service	DockerHub Link
 
 - Stores data in MongoDB
 
-# ML Predictor Service
+### ML Predictor Service
 
 - Flask service hosting a trained regression model
 
@@ -50,17 +52,17 @@ Service	DockerHub Link
 
 - Used by API for patient ETA calculations
 
-# Mongo DB Service
+### Mongo DB Service
 
 - Mongo DB database hosted by the droplet
 
 ---
 
-### Configuring and Running the System (All Platforms)
+## Configuring and Running the System (All Platforms)
 
 - This project is containerised, so the simplest and recommended way to run everything (API, ML service, MongoDB, seed data) is with Docker Compose.
 
-# 1. Prerequisites
+### 1. Prerequisites
 
 - Install:
 
@@ -78,26 +80,29 @@ Service	DockerHub Link
 
 Verify:
 
-- git --version
-- docker --version
-- docker compose version
+```sh
+git --version
+docker --version
+docker compose version
+```
 
-# 2. Clone the Repository
+### 2. Clone the Repository
 - git clone https://github.com/swe-students-fall2025/5-final-js4j.git
 - cd 5-final-js4j
 
-# 3. Create the .env File
+### 3. Create the .env File
 
 - Sent in private chat with submission
 
-
 - Then edit .env and update any passwords or secrets as described in the section “Secret configuration files (.env and env.example)” below.
 
-# 4. Run the Full System in Development
+### 4. Run the Full System in Development
 
 From the project root:
 
-- docker compose up --build
+```sh
+docker compose up --build
+```
 
 ---
 
@@ -136,3 +141,46 @@ These must be added under:
 
 
 An exercise to put to practice software development teamwork, subsystem communication, containers, deployment, and CI/CD pipelines. See [instructions](./instructions.md) for details.
+
+## Development
+
+```sh
+# Navigate to the API service
+cd api_service
+
+# Install dependencies (including dev requirements)
+pip install -r requirements.txt
+
+# Format all Python code
+black .
+
+# Lint Python files using pylint
+pylint app/**/*.py
+
+# Run API service tests with coverage enforcement
+pytest \
+  --cov=app \
+  --cov=models \
+  --cov-fail-under=80
+  
+
+# Navigate to the Machine Learning service
+cd ../ml_service
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Format all Python code
+black .
+
+# Lint Python files using pylint
+pylint app --ignore=tests
+
+# Run ML tests with coverage enforcement
+pytest \
+  --cov=. \
+  --cov-report=term-missing \
+  --cov-fail-under=80 \
+  --import-mode=importlib \
+  app
+```
